@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -141,3 +142,20 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+=======
+# Node modules
+node_modules/
+# Frontend build output
+frontend/build/
+frontend/dist/
+# Environment files
+.env
+# Prisma files
+prisma/*.db
+# Logs
+*.log
+# OS files
+.DS_Store
+# IDE files
+.vscode/
+>>>>>>> 893b9fe (Initial commit with project code)

@@ -1,0 +1,46 @@
+import winston from 'winston';
+import config from '../config.js';
+
+const { combine, timestamp, printf, colorize, errors } = winston.format;
+
+const logFormat = printf(({ level, message, timestamp, stack, scraper }) => {
+  const scraperTag = scraper ? `[${scraper}]` : '';
+  const logMessage = stack || message;
+  return `${timestamp} ${level} ${scraperTag} ${logMessage}`;
+});
+
+export function createLogger(scraperName) {
+  return winston.createLogger({
+    level: config.logging.level,
+    format: combine(
+      errors({ stack: true }),
+      timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      logFormat
+    ),
+    defaultMeta: { scraper: scraperName },
+    transports: [
+      new winston.transports.Console({
+        format: combine(
+          colorize(),
+          timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+          logFormat
+        ),
+      }),
+      new winston.transports.File({
+        filename: 'logs/error.log',
+        level: 'error',
+        maxsize: 5242880,
+        maxFiles: 5,
+      }),
+      new winston.transports.File({
+        filename: 'logs/combined.log',
+        maxsize: 5242880,
+        maxFiles: 5,
+      }),
+    ],
+  });
+}
+
+export const logger = createLogger('global');
+
+export default { createLogger, logger };

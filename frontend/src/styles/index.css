@@ -1,0 +1,494 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────────
+   BASE LAYER — Design Tokens & Resets
+   ────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --color-primary: 99 102 241;
+    --color-secondary: 168 85 247;
+    --color-accent: 139 92 246;
+
+    /* Glass tokens */
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-hover-border: rgba(255, 255, 255, 0.18);
+    --glass-blur: 20px;
+
+    /* Focus ring */
+    --ring-primary: rgba(99, 102, 241, 0.5);
+    --ring-offset: #030712;
+
+    /* Glow effects */
+    --glow-primary: rgba(99, 102, 241, 0.25);
+    --glow-secondary: rgba(168, 85, 247, 0.25);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-gray-950 text-gray-100 font-sans antialiased;
+    font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  }
+
+  * {
+    @apply border-gray-800;
+  }
+
+  /* Global focus-visible for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-indigo-500/50 ring-offset-2 ring-offset-gray-950;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-indigo-500/30 text-white;
+  }
+}
+
+/* ──────────────────────────────────────────────
+   COMPONENT LAYER — Glass System & Patterns
+   ────────────────────────────────────────────── */
+@layer components {
+  /* ─── Glass Surfaces ─── */
+  .glass {
+    @apply bg-white/[0.05] backdrop-blur-xl border border-white/[0.10] shadow-lg shadow-black/10;
+  }
+
+  .glass-subtle {
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08];
+  }
+
+  .glass-dark {
+    @apply bg-gray-900/50 backdrop-blur-xl border border-gray-700/50;
+  }
+
+  .glass-card {
+    @apply bg-gradient-to-br from-white/[0.08] to-white/[0.03] backdrop-blur-xl
+           border border-white/[0.10] rounded-2xl shadow-lg shadow-black/10 p-6
+           transition-all duration-300;
+  }
+
+  .glass-card-hover {
+    @apply glass-card hover:border-white/[0.18] hover:shadow-xl hover:shadow-indigo-500/5;
+  }
+
+  /* ─── Glass Input ─── */
+  .glass-input {
+    @apply bg-white/[0.05] border border-white/[0.10] rounded-xl px-4 py-3
+           text-gray-100 placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-indigo-500/50
+           focus:border-indigo-500/60 focus:bg-white/[0.07]
+           focus:shadow-[inset_0_1px_12px_rgba(99,102,241,0.08)]
+           transition-all duration-200 ease-out;
+  }
+
+  /* ─── Gradient Text ─── */
+  .gradient-text {
+    @apply bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-text-vivid {
+    @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+  }
+
+  /* ─── Gradient Buttons ─── */
+  .gradient-btn {
+    @apply bg-gradient-to-r from-indigo-500 to-purple-500
+           hover:from-indigo-600 hover:to-purple-600
+           text-white font-medium rounded-xl px-6 py-3
+           transition-all duration-300
+           shadow-lg shadow-indigo-500/25
+           hover:shadow-xl hover:shadow-indigo-500/30
+           active:scale-[0.97];
+  }
+
+  .gradient-btn-outline {
+    @apply border-2 border-indigo-500/50 text-indigo-400
+           hover:bg-indigo-500/10 hover:border-indigo-500/70
+           font-medium rounded-xl px-6 py-3
+           transition-all duration-300;
+  }
+
+  /* ─── Navigation ─── */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl
+           text-gray-400 hover:text-white hover:bg-white/[0.05]
+           transition-all duration-200;
+  }
+
+  .sidebar-link-active {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl
+           text-white bg-gradient-to-r from-indigo-500/20 to-purple-500/20
+           border border-indigo-500/30 shadow-lg shadow-indigo-500/10;
+  }
+
+  .nav-link {
+    @apply text-gray-400 hover:text-white transition-colors duration-200
+           font-medium text-sm;
+  }
+
+  .nav-link-active {
+    @apply text-white relative;
+  }
+
+  .nav-link-active::after {
+    @apply content-[''] absolute -bottom-1 left-0 w-full h-0.5
+           bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full;
+  }
+
+  /* ─── Dropdown ─── */
+  .dropdown-item {
+    @apply flex items-center gap-3 px-4 py-2.5 text-gray-300
+           hover:bg-white/[0.05] hover:text-white rounded-xl
+           transition-all duration-200;
+  }
+
+  /* ─── Badges ─── */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full
+           text-xs font-medium;
+  }
+
+  .badge-primary {
+    @apply bg-indigo-500/20 text-indigo-400 border border-indigo-500/30;
+  }
+
+  .badge-success {
+    @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+  }
+
+  .badge-warning {
+    @apply bg-amber-500/20 text-amber-400 border border-amber-500/30;
+  }
+
+  .badge-danger {
+    @apply bg-red-500/20 text-red-400 border border-red-500/30;
+  }
+
+  .badge-info {
+    @apply bg-cyan-500/20 text-cyan-400 border border-cyan-500/30;
+  }
+}
+
+/* ──────────────────────────────────────────────
+   UTILITY LAYER — Animations & Scrollbar
+   ────────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* ─── Animations ─── */
+  .animate-in {
+    animation: fadeSlideIn 0.5s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background-size: 200% 100%;
+  }
+
+  .animate-pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  /* ─── Scrollbar Styling ─── */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.16);
+  }
+
+  .scrollbar-hidden {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ──────────────────────────────────────────────
+   KEYFRAMES
+   ────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulseGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+  }
+}
+
+@keyframes spin-gradient {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ──────────────────────────────────────────────
+   LIGHT MODE THEME OVERRIDES
+   ────────────────────────────────────────────── */
+html:not(.dark) body {
+  background-color: #f8fafc !important; /* bg-slate-50 */
+  color: #0f172a !important; /* text-slate-900 */
+}
+
+html:not(.dark) .glass {
+  background-color: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important;
+}
+
+html:not(.dark) .glass-subtle {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+  color: #1e293b !important;
+}
+
+html:not(.dark) .glass-card {
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.55)) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  color: #0f172a !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
+}
+
+html:not(.dark) .glass-card-hover {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+html:not(.dark) .glass-card-hover:hover {
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  box-shadow: 0 10px 40px rgba(99, 102, 241, 0.06) !important;
+}
+
+html:not(.dark) .glass-input {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(0, 0, 0, 0.12) !important;
+  color: #0f172a !important;
+}
+html:not(.dark) .glass-input::placeholder {
+  color: #94a3b8 !important;
+}
+html:not(.dark) .glass-input:focus {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(99, 102, 241, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Structural light mode support */
+html:not(.dark) nav {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+html:not(.dark) aside {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+html:not(.dark) footer {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Dynamic text override mappings */
+html:not(.dark) .text-white {
+  color: #0f172a !important;
+}
+html:not(.dark) .text-gray-100 {
+  color: #0f172a !important;
+}
+html:not(.dark) .text-gray-200 {
+  color: #1e293b !important;
+}
+html:not(.dark) .text-gray-300 {
+  color: #334155 !important;
+}
+html:not(.dark) .text-gray-400 {
+  color: #475569 !important;
+}
+html:not(.dark) .text-gray-500 {
+  color: #64748b !important;
+}
+
+/* Form element support */
+html:not(.dark) input, html:not(.dark) select, html:not(.dark) textarea {
+  color: #0f172a !important;
+}
+
+/* Failsafes for common transparent dark-mode styles in Light Mode */
+html:not(.dark) .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+}
+html:not(.dark) .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+html:not(.dark) .bg-white\/20 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+html:not(.dark) .border-white\/5 {
+  border-color: rgba(0, 0, 0, 0.05) !important;
+}
+html:not(.dark) .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+html:not(.dark) .border-white\/15 {
+  border-color: rgba(0, 0, 0, 0.12) !important;
+}
+html:not(.dark) .border-white\/20 {
+  border-color: rgba(0, 0, 0, 0.16) !important;
+}
+html:not(.dark) .shadow-glass {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03) !important;
+}
+html:not(.dark) div.min-h-screen.bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+/* Custom transparent glass-card gradients in Light Mode */
+html:not(.dark) .from-white\/\[0\.08\] {
+  background-image: linear-gradient(to bottom right, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.6)) !important;
+}
+html:not(.dark) .from-indigo-950\/60 {
+  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.04)) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+}
+html:not(.dark) .from-primary-950\/40 {
+  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.04)) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+}
+
+/* Prevent white text from becoming dark inside dark elements in light mode */
+html:not(.dark) .bg-gray-950 .text-white,
+html:not(.dark) .bg-gray-950 *,
+html:not(.dark) .bg-gray-900 .text-white,
+html:not(.dark) .bg-gray-900 * {
+  color: #ffffff !important;
+}
+
+/* Preserve original white color for text/SVGs inside vivid gradients or buttons */
+html:not(.dark) .bg-gradient-to-r:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
+html:not(.dark) .bg-gradient-to-br:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
+html:not(.dark) .bg-gradient-to-tr:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
+html:not(.dark) .gradient-btn *,
+html:not(.dark) .gradient-btn,
+html:not(.dark) .btn-primary *,
+html:not(.dark) .btn-primary,
+html:not(.dark) .bg-indigo-500 *,
+html:not(.dark) .bg-purple-600 *,
+html:not(.dark) .bg-primary-500 *,
+html:not(.dark) .bg-blue-500 *,
+html:not(.dark) .bg-emerald-500 *,
+html:not(.dark) .bg-orange-500 * {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+}
+
+/* Maintain active link status color in Light Mode sidebar */
+html:not(.dark) .sidebar-link.active {
+  background-color: rgba(99, 102, 241, 0.08) !important;
+  border-color: rgba(99, 102, 241, 0.15) !important;
+  color: #4f46e5 !important;
+}
+html:not(.dark) .sidebar-link.active * {
+  color: #4f46e5 !important;
+  stroke: #4f46e5 !important;
+}
+
+/* Gorgeous Light Welcome Card background */
+html:not(.dark) .bg-gradient-to-br.from-indigo-950\/60 {
+  background-image: linear-gradient(to bottom right, rgba(99, 102, 241, 0.06), rgba(168, 85, 247, 0.03)) !important;
+  border-color: rgba(99, 102, 241, 0.12) !important;
+}
+
