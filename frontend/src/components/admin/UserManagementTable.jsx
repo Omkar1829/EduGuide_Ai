@@ -15,22 +15,28 @@ const UserManagementTable = ({ users, loading, pagination, onPageChange, onSort,
       key: 'avatar',
       label: '',
       width: '48px',
-      render: (_, user) => (
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/10">
-          <span className="text-white text-sm font-medium">{user.name?.charAt(0) || 'U'}</span>
-        </div>
-      ),
+      render: (_, user) => {
+        const initial = user.firstName?.charAt(0).toUpperCase() || user.name?.charAt(0).toUpperCase() || 'U';
+        return (
+          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-500/10">
+            <span className="text-white text-sm font-medium">{initial}</span>
+          </div>
+        )
+      },
     },
     {
       key: 'name',
       label: 'Name',
       sortable: true,
-      render: (_, user) => (
-        <div>
-          <p className="font-medium text-white">{user.name}</p>
-          <p className="text-xs text-gray-500">{user.email}</p>
-        </div>
-      ),
+      render: (_, user) => {
+        const fullName = user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : (user.name || 'N/A');
+        return (
+          <div>
+            <p className="font-medium text-white">{fullName}</p>
+            <p className="text-xs text-gray-500">{user.email}</p>
+          </div>
+        )
+      },
     },
     {
       key: 'role',
@@ -38,13 +44,34 @@ const UserManagementTable = ({ users, loading, pagination, onPageChange, onSort,
       sortable: true,
       render: (role) => (
         <span className={`px-2.5 py-1 text-xs font-medium rounded-lg border ${
-          role === 'admin' ? 'bg-rose-500/15 text-rose-400 border-rose-500/20' :
-          role === 'counselor' ? 'bg-purple-500/15 text-purple-400 border-purple-500/20' :
+          role?.toLowerCase() === 'admin' ? 'bg-rose-500/15 text-rose-400 border-rose-500/20' :
+          role?.toLowerCase() === 'counselor' ? 'bg-purple-500/15 text-purple-400 border-purple-500/20' :
           'bg-indigo-500/15 text-indigo-400 border-indigo-500/20'
         }`}>
-          {role?.charAt(0).toUpperCase() + role?.slice(1)}
+          {role ? role.charAt(0).toUpperCase() + role.slice(1).toLowerCase() : 'N/A'}
         </span>
       ),
+    },
+    {
+      key: 'subscriptionTier',
+      label: 'Membership',
+      sortable: true,
+      render: (_, user) => {
+        if (user.role?.toLowerCase() !== 'student') return <span className="text-gray-500 font-medium">-</span>;
+        const currentTier = user.subscriptionTier || 'NEWBIE';
+        
+        return (
+          <span className={`px-2.5 py-1 text-xs font-semibold rounded-lg border ${
+            currentTier === 'PRO_PLUS' ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/20' :
+            currentTier === 'PRO' ? 'bg-purple-500/15 text-purple-400 border-purple-500/20' :
+            'bg-gray-500/15 text-gray-400 border-gray-500/20'
+          }`}>
+            {currentTier === 'PRO_PLUS' ? 'Pro Plus ⭐' :
+             currentTier === 'PRO' ? 'Pro 🚀' :
+             'Newbie 🌱'}
+          </span>
+        )
+      }
     },
     {
       key: 'isActive',
@@ -174,6 +201,16 @@ const UserManagementTable = ({ users, loading, pagination, onPageChange, onSort,
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
+                {viewTarget.role === 'student' && (
+                  <div className="col-span-2 p-3 rounded-xl bg-white/[0.05] border border-white/[0.08]">
+                    <p className="text-xs text-gray-500 mb-1">Membership Tier</p>
+                    <p className="font-medium text-indigo-400">
+                      {viewTarget.subscriptionTier === 'PRO_PLUS' ? 'Pro Plus Membership ⭐' :
+                       viewTarget.subscriptionTier === 'PRO' ? 'Pro Membership 🚀' :
+                       'Newbie (Free) 🌱'}
+                    </p>
+                  </div>
+                )}
                 <div className="p-3 rounded-xl bg-white/[0.05] border border-white/[0.08]">
                   <p className="text-xs text-gray-500 mb-1">Role</p>
                   <p className="font-medium text-white">{viewTarget.role?.charAt(0).toUpperCase() + viewTarget.role?.slice(1)}</p>

@@ -24,6 +24,9 @@ const adminService = {
   createJob: (data) => api.post('/admin/jobs', data),
   updateJob: (id, data) => api.put(`/admin/jobs/${id}`, data),
   deleteJob: (id) => api.delete(`/admin/jobs/${id}`),
+  scrapeJobs: (data) => api.post('/admin/jobs/scrape', data),
+  getScrapeStatus: () => api.get('/admin/jobs/scrape/status'),
+  stopScrapeJobs: () => api.post('/admin/jobs/scrape/stop'),
 }
 
 export default adminService

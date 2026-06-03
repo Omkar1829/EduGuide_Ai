@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import { ROUTES, ROLES } from '../../utils/constants'
 import { 
   Home, 
+  User,
   Bot, 
   GraduationCap, 
   Briefcase, 
@@ -20,6 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const navigation = [
     { path: ROUTES.DASHBOARD, label: 'Dashboard', icon: Home },
+    { path: ROUTES.PROFILE, label: 'My Profile', icon: User },
     { path: ROUTES.AI_DASHBOARD, label: 'AI Dashboard', icon: Bot },
     { path: ROUTES.COURSES, label: 'Courses', icon: GraduationCap },
     { path: ROUTES.JOBS, label: 'Jobs', icon: Briefcase },

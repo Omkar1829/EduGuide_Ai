@@ -67,10 +67,20 @@ const rejectRecommendation = async (req, res, next) => {
   }
 };
 
+const generateRecommendations = async (req, res, next) => {
+  try {
+    const result = await recommendationService.generateRecommendations(req.user.id);
+    return success(res, result, "Recommendations generated successfully", 201);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getRecommendations,
   getRecommendationById,
   createRecommendation,
   acceptRecommendation,
   rejectRecommendation,
+  generateRecommendations,
 };

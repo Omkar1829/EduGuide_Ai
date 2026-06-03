@@ -25,6 +25,21 @@ const updateProfile = async (userId, data) => {
     } = data;
 
     return prisma.$transaction(async (tx) => {
+      // Update User if provided in basicInfo or flat payload
+      const fName = basicInfo.firstName !== undefined ? basicInfo.firstName : data.firstName;
+      const lName = basicInfo.lastName !== undefined ? basicInfo.lastName : data.lastName;
+
+      if (fName !== undefined || lName !== undefined) {
+        const userUpdateData = {};
+        if (fName !== undefined) userUpdateData.firstName = fName;
+        if (lName !== undefined) userUpdateData.lastName = lName;
+
+        await tx.user.update({
+          where: { id: userId },
+          data: userUpdateData,
+        });
+      }
+
       // 1. Update core student profile fields
       await tx.studentProfile.update({
         where: { id: profile.id },
@@ -36,6 +51,7 @@ const updateProfile = async (userId, data) => {
           city: basicInfo.city || null,
           state: basicInfo.state || null,
           country: basicInfo.country || "India",
+          address: basicInfo.address || null,
         },
       });
 
@@ -235,7 +251,29 @@ const updateProfile = async (userId, data) => {
   }
 
   // Fallback to flat profile updates (settings screen)
-  return profileRepo.updateProfile(profile.id, data);
+  const userFields = {};
+  if (data && typeof data === "object") {
+    const fName = data.firstName !== undefined ? data.firstName : (data.basicInfo ? data.basicInfo.firstName : undefined);
+    const lName = data.lastName !== undefined ? data.lastName : (data.basicInfo ? data.basicInfo.lastName : undefined);
+
+    if (fName !== undefined) userFields.firstName = fName;
+    if (lName !== undefined) userFields.lastName = lName;
+  }
+
+  if (Object.keys(userFields).length > 0) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: userFields,
+    });
+  }
+
+  // Strip user fields before updating profile in the repo to prevent schema validation errors
+  const profileData = { ...data };
+  delete profileData.firstName;
+  delete profileData.lastName;
+  delete profileData.basicInfo;
+
+  return profileRepo.updateProfile(profile.id, profileData);
 };
 
 const addAcademicRecord = async (userId, data) => {

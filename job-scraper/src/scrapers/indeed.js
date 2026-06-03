@@ -17,6 +17,7 @@ export class IndeedScraper extends BaseScraper {
     const params = new URLSearchParams({
       q: query,
       l: location,
+      radius: '25', // Restrict to a 25-mile (~40km) radius
       start: page * 10,
       sort: 'date',
     });

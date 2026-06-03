@@ -6,22 +6,26 @@ import Button from '../common/Button'
 
 const UserFormModal = ({ isOpen, onClose, onSave, user, loading = false }) => {
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
-    role: 'student',
+    role: 'STUDENT',
     isActive: true,
+    subscriptionTier: 'NEWBIE',
   })
 
   useEffect(() => {
     if (user) {
       setFormData({
-        name: user.name || '',
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
         email: user.email || '',
-        role: user.role || 'student',
+        role: user.role || 'STUDENT',
         isActive: user.isActive !== undefined ? user.isActive : true,
+        subscriptionTier: user.subscriptionTier || 'NEWBIE',
       })
     } else {
-      setFormData({ name: '', email: '', role: 'student', isActive: true })
+      setFormData({ firstName: '', lastName: '', email: '', role: 'STUDENT', isActive: true, subscriptionTier: 'NEWBIE' })
     }
   }, [user, isOpen])
 
@@ -46,15 +50,26 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, loading = false }) => {
       size="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <Input
-          label="Full Name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Enter full name"
-          required
-          icon={<User className="w-4 h-4" />}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="First Name"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            placeholder="First name"
+            required
+            icon={<User className="w-4 h-4" />}
+          />
+          <Input
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            placeholder="Last name"
+            required
+            icon={<User className="w-4 h-4" />}
+          />
+        </div>
         <Input
           label="Email"
           name="email"
@@ -69,15 +84,29 @@ const UserFormModal = ({ isOpen, onClose, onSave, user, loading = false }) => {
           <label className="block text-sm font-medium text-gray-300">Role</label>
           <select
             name="role"
-            value={formData.role}
+            value={formData.role?.toUpperCase()}
             onChange={handleChange}
             className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-200"
           >
-            <option value="student">Student</option>
-            <option value="counselor">Counselor</option>
-            <option value="admin">Admin</option>
+            <option value="STUDENT">Student</option>
+            <option value="ADMIN">Admin</option>
           </select>
         </div>
+        {formData.role?.toLowerCase() === 'student' && (
+          <div className="space-y-1.5">
+            <label className="block text-sm font-medium text-gray-300">Membership Tier</label>
+            <select
+              name="subscriptionTier"
+              value={formData.subscriptionTier}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-200"
+            >
+              <option value="NEWBIE">Newbie (Free)</option>
+              <option value="PRO">Pro Membership</option>
+              <option value="PRO_PLUS">Pro Plus Membership</option>
+            </select>
+          </div>
+        )}
         <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.05] border border-white/[0.08]">
           <input
             type="checkbox"

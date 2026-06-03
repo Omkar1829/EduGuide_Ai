@@ -289,6 +289,21 @@ export async function cleanupOldJobs(daysOld = 30) {
   }
 }
 
+export async function getUniqueUserLocations() {
+  const client = getPrismaClient();
+  try {
+    const result = await client.$queryRawUnsafe(
+      "SELECT DISTINCT city FROM student_profiles WHERE city IS NOT NULL AND city != ''"
+    );
+    const cities = result.map(row => row.city).filter(Boolean);
+    logger.info(`Fetched unique student profile locations: ${JSON.stringify(cities)}`);
+    return cities.length > 0 ? cities : ['Mumbai', 'Bengaluru', 'Delhi'];
+  } catch (error) {
+    logger.error(`Failed to fetch unique user locations: ${error.message}`);
+    return ['Mumbai', 'Bengaluru', 'Delhi'];
+  }
+}
+
 export async function disconnect() {
   if (prisma) {
     await prisma.$disconnect();
@@ -306,5 +321,6 @@ export default {
   getJobByTitleAndCompany,
   getJobStats,
   cleanupOldJobs,
+  getUniqueUserLocations,
   disconnect,
 };

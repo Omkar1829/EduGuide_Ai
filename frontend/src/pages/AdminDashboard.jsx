@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Users, GraduationCap, Briefcase, HelpCircle, UserCheck, UserPlus,
-  PlusCircle, PlusSquare, BarChart3, RefreshCw, AlertTriangle,
-  User, CheckCircle, Server, Database, Bot, ShieldCheck, Inbox
+  PlusCircle, PlusSquare, RefreshCw, AlertTriangle,
+  User, CheckCircle, Server, Database, Bot, ShieldCheck, Inbox, Brain
 } from 'lucide-react'
 import AdminStatsCard from '../components/admin/AdminStatsCard'
 import ActivityChart from '../components/admin/ActivityChart'
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
     { label: 'Add Course', icon: <PlusCircle className="w-6 h-6 text-white" />, path: '/admin/courses', color: 'from-indigo-500 to-purple-500' },
     { label: 'Add Job', icon: <PlusSquare className="w-6 h-6 text-white" />, path: '/admin/jobs', color: 'from-emerald-500 to-teal-500' },
     { label: 'View Users', icon: <Users className="w-6 h-6 text-white" />, path: '/admin/users', color: 'from-amber-500 to-orange-500' },
-    { label: 'Analytics', icon: <BarChart3 className="w-6 h-6 text-white" />, path: '/admin/analytics', color: 'from-rose-500 to-pink-500' },
+    { label: 'Manage Quizzes', icon: <Brain className="w-6 h-6 text-white" />, path: '/admin/quizzes', color: 'from-rose-500 to-pink-500' },
   ]
 
   const activityIconMap = {
@@ -116,6 +116,39 @@ const AdminDashboard = () => {
     course: { icon: <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />, bg: 'bg-emerald-500/10' },
     job: { icon: <Briefcase className="w-3.5 h-3.5 text-amber-400" />, bg: 'bg-amber-500/10' },
     default: { icon: <CheckCircle className="w-3.5 h-3.5 text-rose-400" />, bg: 'bg-rose-500/10' },
+  }
+  const getActivityDetails = (item) => {
+    const timestamp = item.timestamp || item.createdAt
+    const timeStr = timestamp ? new Date(timestamp).toLocaleString() : 'Just now'
+    
+    let text = ''
+    let iconKey = 'default'
+    const entity = item.entity || {}
+
+    switch (item.type) {
+      case 'user_registered':
+        text = `New student registered: ${entity.firstName || ''} ${entity.lastName || ''}`.trim() || 'New student registered'
+        iconKey = 'user'
+        break
+      case 'course_created':
+        text = `New course added: "${entity.title || 'Untitled'}" by ${entity.provider || 'Unknown'}`
+        iconKey = 'course'
+        break
+      case 'job_posted':
+        text = `New job scraping: "${entity.title || 'Untitled'}" at ${entity.company || 'Unknown'}`
+        iconKey = 'job'
+        break
+      case 'recommendation_created':
+        const userName = entity.user ? `${entity.user.firstName || ''} ${entity.user.lastName || ''}`.trim() : 'a user'
+        text = `AI recommendation created for ${userName}`
+        iconKey = 'default'
+        break
+      default:
+        text = item.message || item.text || 'Platform activity recorded'
+        iconKey = 'default'
+    }
+
+    return { text, time: timeStr, iconKey }
   }
 
   return (
@@ -215,26 +248,71 @@ const AdminDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ActivityChart
-          data={jobPostingsData}
-          title="Job Postings (Last 6 Months)"
-          type="bar"
-          color="amber"
-        />
+        <Card header={
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-indigo-400" />
+            <span className="font-bold text-white text-base">AI Counselor & Usage Metrics</span>
+          </div>
+        }>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.07] transition-all flex flex-col justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Total Tokens Gone</p>
+                <p className="text-2xl font-black text-indigo-400">
+                  {stats?.aiUsage?.totalTokens?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">Based on character count</p>
+            </div>
+            
+            <div className="p-4 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.07] transition-all flex flex-col justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">AI Chat Consultations</p>
+                <p className="text-2xl font-black text-emerald-400">
+                  {stats?.aiUsage?.chatMessages?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">
+                across {stats?.aiUsage?.chatSessions || '0'} active sessions
+              </p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.07] transition-all flex flex-col justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Recommendations Created</p>
+                <p className="text-2xl font-black text-purple-400">
+                  {stats?.aiUsage?.recommendations?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">Career & skill matches</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.07] transition-all flex flex-col justify-between">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Avg Student Limit Left</p>
+                <p className="text-2xl font-black text-amber-400">
+                  {stats?.aiUsage?.totalLimitRemaining?.toLocaleString() || '0'}
+                </p>
+              </div>
+              <p className="text-[10px] text-gray-400 mt-2">Remaining prompts</p>
+            </div>
+          </div>
+        </Card>
 
         <Card header="Recent Activity">
           <div className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin">
             {activity.length > 0 ? (
               activity.map((item, index) => {
-                const actIcon = activityIconMap[item.type] || activityIconMap.default
+                const details = getActivityDetails(item)
+                const actIcon = activityIconMap[details.iconKey] || activityIconMap.default
                 return (
                   <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.07] transition-colors duration-200">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${actIcon.bg}`}>
                       {actIcon.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">{item.message || item.text}</p>
-                      <p className="text-xs text-gray-500">{item.time || item.createdAt}</p>
+                      <p className="text-sm text-white truncate">{details.text}</p>
+                      <p className="text-xs text-gray-500">{details.time}</p>
                     </div>
                   </div>
                 )

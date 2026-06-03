@@ -12,7 +12,8 @@ import {
   User as UserIcon, 
   LogOut, 
   ChevronDown,
-  Sparkles
+  Sparkles,
+  LayoutDashboard
 } from 'lucide-react'
 
 const Navbar = () => {
@@ -59,6 +60,11 @@ const Navbar = () => {
     setIsDarkMode(!isDarkMode)
   }
 
+  const userFullName = user?.firstName
+    ? `${user.firstName} ${user.lastName || ''}`.trim()
+    : user?.name || 'User';
+  const userInitial = user?.firstName?.charAt(0).toUpperCase() || user?.name?.charAt(0).toUpperCase() || 'U';
+
   const navLinks = [
     { path: ROUTES.DASHBOARD, label: 'Dashboard' },
     { path: ROUTES.AI_DASHBOARD, label: 'AI Counselor' },
@@ -80,28 +86,10 @@ const Navbar = () => {
               </span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.path || location.pathname.startsWith(link.path + '/')
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                      isActive 
-                        ? 'text-white bg-white/10 shadow-glass-inset' 
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                )
-              })}
-            </div>
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Dark mode toggle */}
+            {/* Dark mode toggle - hidden temporarily
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all"
@@ -113,6 +101,7 @@ const Navbar = () => {
                 <Moon className="w-5 h-5" />
               )}
             </button>
+            */}
 
             {/* Notifications panel toggle */}
             <div className="relative" ref={notifRef}>
@@ -149,11 +138,11 @@ const Navbar = () => {
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-md">
                   <span className="text-white font-black text-sm">
-                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                    {userInitial}
                   </span>
                 </div>
                 <span className="hidden sm:block text-sm font-semibold text-gray-300">
-                  {user?.name || 'User'}
+                  {userFullName}
                 </span>
                 <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`} />
               </button>
@@ -161,10 +150,18 @@ const Navbar = () => {
               {isMenuOpen && (
                 <div className="absolute right-0 mt-3 w-56 glass rounded-2xl shadow-glass border border-white/10 overflow-hidden animate-slide-up bg-gray-900/90 backdrop-blur-xl">
                   <div className="p-4 border-b border-white/10">
-                    <p className="text-sm font-bold text-white leading-none">{user?.name}</p>
+                    <p className="text-sm font-bold text-white leading-none">{userFullName}</p>
                     <p className="text-xs text-gray-500 mt-1 truncate">{user?.email}</p>
                   </div>
                   <div className="p-2 space-y-0.5">
+                    <Link
+                      to={ROUTES.DASHBOARD}
+                      className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl text-sm font-medium transition-all"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <LayoutDashboard className="w-4 h-4 text-gray-400" />
+                      <span>Dashboard</span>
+                    </Link>
                     <Link
                       to={ROUTES.SETTINGS}
                       className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl text-sm font-medium transition-all"
@@ -174,7 +171,7 @@ const Navbar = () => {
                       <span>Settings</span>
                     </Link>
                     <Link
-                      to={ROUTES.PROFILE_WIZARD}
+                      to={ROUTES.PROFILE}
                       className="flex items-center gap-3 px-3 py-2 text-gray-300 hover:bg-white/5 hover:text-white rounded-xl text-sm font-medium transition-all"
                       onClick={() => setIsMenuOpen(false)}
                     >

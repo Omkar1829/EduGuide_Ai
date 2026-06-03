@@ -26,6 +26,7 @@ const updateUser = async (id, data) => {
   if (data.isVerified !== undefined) allowedFields.isVerified = data.isVerified;
   if (data.isActive !== undefined) allowedFields.isActive = data.isActive;
   if (data.avatarUrl !== undefined) allowedFields.avatarUrl = data.avatarUrl;
+  if (data.subscriptionTier !== undefined) allowedFields.subscriptionTier = data.subscriptionTier;
 
   if (Object.keys(allowedFields).length === 0) {
     throw new AppError("No valid fields to update", 400);
@@ -106,7 +107,17 @@ const getJobById = async (id) => {
 };
 
 const createJob = async (data) => {
-  return adminRepository.createJob(data);
+  const jobData = { ...data };
+  if (jobData.salaryMin !== undefined || jobData.salaryMax !== undefined) {
+    const min = jobData.salaryMin !== undefined && jobData.salaryMin !== null ? jobData.salaryMin : "";
+    const max = jobData.salaryMax !== undefined && jobData.salaryMax !== null ? jobData.salaryMax : "";
+    if (min || max) {
+      jobData.salaryRange = `${min} - ${max}`.trim();
+    }
+    delete jobData.salaryMin;
+    delete jobData.salaryMax;
+  }
+  return adminRepository.createJob(jobData);
 };
 
 const updateJob = async (id, data) => {
@@ -114,7 +125,17 @@ const updateJob = async (id, data) => {
   if (!job) {
     throw new AppError("Job not found", 404);
   }
-  return adminRepository.updateJob(id, data);
+  const jobData = { ...data };
+  if (jobData.salaryMin !== undefined || jobData.salaryMax !== undefined) {
+    const min = jobData.salaryMin !== undefined && jobData.salaryMin !== null ? jobData.salaryMin : "";
+    const max = jobData.salaryMax !== undefined && jobData.salaryMax !== null ? jobData.salaryMax : "";
+    if (min || max) {
+      jobData.salaryRange = `${min} - ${max}`.trim();
+    }
+    delete jobData.salaryMin;
+    delete jobData.salaryMax;
+  }
+  return adminRepository.updateJob(id, jobData);
 };
 
 const deleteJob = async (id) => {
@@ -161,6 +182,130 @@ const deleteQuiz = async (id) => {
   return adminRepository.deleteQuiz(id);
 };
 
+let activeScrapeProcess = null;
+let activeScrapeStatus = {
+  active: false,
+  location: '',
+  limit: 10,
+  keyword: '',
+  progress: {
+    scraped: 0,
+    inserted: 0,
+    failed: 0,
+    currentSearch: '',
+    currentLoc: '',
+  },
+  result: null,
+};
+
+const getScrapeStatus = () => {
+  return activeScrapeStatus;
+};
+
+const stopScrapeJobs = () => {
+  if (activeScrapeProcess) {
+    try {
+      activeScrapeProcess.kill("SIGINT");
+    } catch (e) {
+      console.error("Failed to kill scraper process:", e);
+    }
+    activeScrapeProcess = null;
+  }
+  activeScrapeStatus.active = false;
+  activeScrapeStatus.result = {
+    success: false,
+    message: "Scraping terminated by administrator.",
+    inserted: activeScrapeStatus.progress.inserted,
+    failed: activeScrapeStatus.progress.failed,
+    totalScraped: activeScrapeStatus.progress.scraped,
+  };
+  return activeScrapeStatus;
+};
+
+const scrapeJobs = async (location, limit = 10, keyword = '') => {
+  const { spawn } = require("child_process");
+  const path = require("path");
+
+  if (activeScrapeStatus.active) {
+    throw new AppError("Scrape process already running.", 400);
+  }
+
+  // Reset status
+  activeScrapeStatus = {
+    active: true,
+    location,
+    limit: parseInt(limit) || 10,
+    keyword: keyword || '',
+    progress: {
+      scraped: 0,
+      inserted: 0,
+      failed: 0,
+      currentSearch: '',
+      currentLoc: '',
+    },
+    result: null,
+  };
+
+  const scraperPath = path.resolve(__dirname, "../../../job-scraper/src/index.js");
+  const cmdArgs = ["scrape", location, keyword || '', limit ? String(limit) : ''];
+  const cwd = path.resolve(__dirname, "../../../job-scraper");
+
+  console.log(`Spawning background scraper process: node "${scraperPath}" ${cmdArgs.join(" ")}`);
+  
+  activeScrapeProcess = spawn("node", [scraperPath, ...cmdArgs], { cwd });
+
+  activeScrapeProcess.stdout.on("data", (data) => {
+    const text = data.toString();
+    const lines = text.split("\n");
+    for (const line of lines) {
+      if (line.includes("PROGRESS_UPDATE:")) {
+        try {
+          const startIdx = line.indexOf("PROGRESS_UPDATE:");
+          const jsonStr = line.substring(startIdx + "PROGRESS_UPDATE:".length).trim();
+          const update = JSON.parse(jsonStr);
+          if (update.scrapedCount !== undefined) {
+            activeScrapeStatus.progress.scraped += update.scrapedCount;
+          }
+          if (update.insertedCount !== undefined) {
+            activeScrapeStatus.progress.inserted = update.insertedCount;
+          }
+          if (update.failedCount !== undefined) {
+            activeScrapeStatus.progress.failed = update.failedCount;
+          }
+          if (update.currentSearch) {
+            activeScrapeStatus.progress.currentSearch = update.currentSearch;
+          }
+          if (update.currentLoc) {
+            activeScrapeStatus.progress.currentLoc = update.currentLoc;
+          }
+        } catch (e) {
+          console.error("Error parsing scraper progress update:", e);
+        }
+      }
+    }
+  });
+
+  activeScrapeProcess.stderr.on("data", (data) => {
+    console.error(`Scraper stderr: ${data.toString()}`);
+  });
+
+  activeScrapeProcess.on("close", (code) => {
+    console.log(`Scraper process finished with exit code ${code}`);
+    activeScrapeStatus.active = false;
+    activeScrapeProcess = null;
+    if (!activeScrapeStatus.result) {
+      activeScrapeStatus.result = {
+        success: code === 0,
+        inserted: activeScrapeStatus.progress.inserted,
+        failed: activeScrapeStatus.progress.failed,
+        totalScraped: activeScrapeStatus.progress.scraped,
+      };
+    }
+  });
+
+  return activeScrapeStatus;
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -186,4 +331,7 @@ module.exports = {
   getAllQuizzes,
   getQuizById,
   deleteQuiz,
+  scrapeJobs,
+  getScrapeStatus,
+  stopScrapeJobs,
 };

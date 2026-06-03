@@ -36,6 +36,9 @@ router.get("/jobs/:id", adminController.getJobById);
 router.post("/jobs", validate(createJobValidation), adminController.createJob);
 router.put("/jobs/:id", validate(updateJobValidation), adminController.updateJob);
 router.delete("/jobs/:id", adminController.deleteJob);
+router.get("/jobs/scrape/status", adminController.getScrapeStatus);
+router.post("/jobs/scrape/stop", adminController.stopScrapeJobs);
+router.post("/jobs/scrape", adminController.scrapeJobs);
 
 // Admin Quiz Management
 router.get("/quizzes", adminController.getAllQuizzes);

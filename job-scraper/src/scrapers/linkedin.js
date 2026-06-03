@@ -14,6 +14,7 @@ export class LinkedInScraper extends BaseScraper {
     const params = new URLSearchParams({
       keywords: query,
       location: location || '',
+      distance: '25', // Restrict to a 25-mile (~40km) radius
       start: start.toString(),
       sortBy: 'DD',
       f_TPR: 'r604800',

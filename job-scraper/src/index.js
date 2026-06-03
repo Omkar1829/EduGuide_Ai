@@ -1,7 +1,7 @@
 import config from './config.js';
 import { createLogger, logger as globalLogger } from './utils/logger.js';
 import { deduplicateJobs } from './utils/cleaner.js';
-import { insertJobs, getJobStats, disconnect } from './database/db.js';
+import { insertJobs, getJobStats, getUniqueUserLocations, disconnect } from './database/db.js';
 import { startScheduler, stopScheduler, getStatus, triggerImmediateRun } from './scheduler.js';
 import { IndeedScraper } from './scrapers/indeed.js';
 import { LinkedInScraper } from './scrapers/linkedin.js';
@@ -28,7 +28,7 @@ const searchQueries = [
   { query: 'backend developer', location: '' },
 ];
 
-export async function runScrapers() {
+export async function runScrapers(customLocations = null, customKeyword = null, maxPagesOverride = null) {
   const results = {
     inserted: 0,
     updated: 0,
@@ -38,21 +38,30 @@ export async function runScrapers() {
   };
 
   logger.info('Starting scrape run...');
+  const userLocations = customLocations && customLocations.length > 0 ? customLocations : await getUniqueUserLocations();
+  logger.info(`Target locations: ${JSON.stringify(userLocations)}`);
+
+  const activeQueries = customKeyword ? [{ query: customKeyword, location: '' }] : searchQueries;
+  const maxPages = maxPagesOverride ? parseInt(maxPagesOverride) : config.scraper.maxPages;
 
   for (const [source, scraper] of Object.entries(scrapers)) {
     logger.info(`\n--- Scraping ${source.toUpperCase()} ---`);
     
     let sourceJobs = [];
     
-    for (const search of searchQueries) {
-      try {
-        logger.info(`Searching "${search.query}" on ${source}...`);
-        const jobs = await scraper.scrape(search.query, search.location, config.scraper.maxPages);
-        sourceJobs.push(...jobs);
-        logger.info(`Found ${jobs.length} jobs for "${search.query}" on ${source}`);
-      } catch (error) {
-        logger.error(`Error scraping ${source} for "${search.query}": ${error.message}`);
-        results.failed++;
+    for (const search of activeQueries) {
+      for (const loc of userLocations) {
+        try {
+          logger.info(`Searching "${search.query}" in "${loc}" on ${source}...`);
+          const jobs = await scraper.scrape(search.query, loc, maxPages);
+          sourceJobs.push(...jobs);
+          // Emit progress marker for backend spawn tracking
+          console.log(`PROGRESS_UPDATE: {"source": "${source}", "scrapedCount": ${sourceJobs.length}, "currentSearch": "${search.query}", "currentLoc": "${loc}"}`);
+          logger.info(`Found ${jobs.length} jobs for "${search.query}" in "${loc}" on ${source}`);
+        } catch (error) {
+          logger.error(`Error scraping ${source} for "${search.query}" in "${loc}": ${error.message}`);
+          results.failed++;
+        }
       }
     }
 
@@ -69,6 +78,7 @@ export async function runScrapers() {
           deduplicated: deduplicated.length,
           inserted: insertResult.inserted,
         };
+        console.log(`PROGRESS_UPDATE: {"source": "${source}", "insertedCount": ${results.inserted}, "failedCount": ${results.failed}}`);
       } catch (error) {
         logger.error(`Error inserting jobs from ${source}: ${error.message}`);
         results.failed++;
@@ -130,7 +140,10 @@ async function main() {
 
       case 'scrape':
         logger.info('Running scrapers once...');
-        const result = await runScrapers();
+        const locationArg = args[1] ? [args[1]] : null;
+        const keywordArg = args[2] || null;
+        const limitArg = args[3] ? parseInt(args[3]) : null;
+        const result = await runScrapers(locationArg, keywordArg, limitArg);
         logger.info('Scrape complete:', JSON.stringify(result, null, 2));
         await disconnect();
         break;

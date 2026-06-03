@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Card from '../components/common/Card'
 import { ROUTES } from '../utils/constants'
+import { fetchProfile } from '../store/slices/profileSlice'
+import { fetchEnrolledCourses } from '../store/slices/courseSlice'
+import { fetchSavedJobs } from '../store/slices/jobSlice'
+import { fetchUserResults } from '../store/slices/quizSlice'
 import { 
   GraduationCap, 
   CheckCircle, 
@@ -17,22 +21,93 @@ import {
 } from 'lucide-react'
 
 const UserDashboard = () => {
+  const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
-  const [stats, setStats] = useState({
-    coursesEnrolled: 0,
-    quizzesCompleted: 0,
-    jobsApplied: 0,
-    profileCompletion: 0,
-  })
+  const { profile, academicRecords, skills, interests, certifications } = useSelector((state) => state.profile)
+  const { enrolledCourses } = useSelector((state) => state.courses)
+  const { savedJobs } = useSelector((state) => state.jobs)
+  const { userResults } = useSelector((state) => state.quizzes)
 
   useEffect(() => {
-    setStats({
-      coursesEnrolled: 5,
-      quizzesCompleted: 3,
-      jobsApplied: 8,
-      profileCompletion: 75,
+    dispatch(fetchProfile())
+    dispatch(fetchEnrolledCourses())
+    dispatch(fetchSavedJobs())
+    dispatch(fetchUserResults())
+  }, [dispatch])
+
+  // Personalized name calculation
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : ''
+  const welcomeName = fullName || user?.name || 'Student'
+
+  // Dynamic Stats calculations
+  const coursesCount = enrolledCourses?.length || 0
+  const quizzesCount = userResults?.length || 0
+  const jobsCount = savedJobs?.length || 0
+  const completionPercent = profile?.completionPct || 0
+
+  // Calculate dynamic pending actions count based on missing items
+  let pendingActionsCount = 0
+  if (!profile?.phoneNumber) pendingActionsCount++
+  if (!profile?.bio) pendingActionsCount++
+  if (!academicRecords || academicRecords.length === 0) pendingActionsCount++
+  if (!skills || skills.length === 0) pendingActionsCount++
+  if (!interests || interests.length === 0) pendingActionsCount++
+  if (!certifications || certifications.length === 0) pendingActionsCount++
+  if (pendingActionsCount === 0 && !profile?.profileComplete) pendingActionsCount = 1
+
+  // Compile and sort recent activities chronologically
+  const compiledActivities = []
+
+  if (enrolledCourses && enrolledCourses.length > 0) {
+    enrolledCourses.forEach(ec => {
+      compiledActivities.push({
+        text: `Enrolled in "${ec.course?.title || ec.title || 'Course'}"`,
+        time: ec.enrolledAt || ec.createdAt,
+        status: ec.status === 'completed' ? 'Completed' : 'In Progress',
+        color: ec.status === 'completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+      })
     })
-  }, [])
+  }
+
+  if (userResults && userResults.length > 0) {
+    userResults.forEach(ur => {
+      compiledActivities.push({
+        text: `Completed Quiz: "${ur.quiz?.title || 'Assessment'}"`,
+        time: ur.createdAt,
+        status: `Score: ${Math.round(ur.percentage)}%`,
+        color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+      })
+    })
+  }
+
+  if (savedJobs && savedJobs.length > 0) {
+    savedJobs.forEach(sj => {
+      compiledActivities.push({
+        text: `Saved Job: "${sj.job?.title || 'Position'}" at ${sj.job?.company || 'Company'}`,
+        time: sj.createdAt,
+        status: 'Saved',
+        color: 'bg-purple-500/10 text-purple-400 border-purple-500/20'
+      })
+    })
+  }
+
+  // Sort activities chronologically, default to dummy if empty so the portal looks nice
+  let displayActivities = []
+  if (compiledActivities.length > 0) {
+    compiledActivities.sort((a, b) => new Date(b.time) - new Date(a.time))
+    displayActivities = compiledActivities.slice(0, 5).map(act => ({
+      text: act.text,
+      time: act.time ? new Date(act.time).toLocaleDateString() + ' ' + new Date(act.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
+      status: act.status,
+      color: act.color
+    }))
+  } else {
+    // Elegant dynamic state if user hasn't interacted yet
+    displayActivities = [
+      { text: 'Assess your career path with our AI Quizzes', time: 'Recommendation', status: 'Ready', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
+      { text: 'Fill your profile to get personalized job suggestions', time: 'Profile Action', status: 'Pending', color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+    ]
+  }
 
   const quickActions = [
     { label: 'Take Career Quiz', desc: 'Assess your strengths', icon: Compass, path: ROUTES.QUIZ, color: 'from-blue-500 to-indigo-500 shadow-blue-500/20' },
@@ -54,7 +129,7 @@ const UserDashboard = () => {
               <Sparkles className="w-3.5 h-3.5" /> Empowering Career Growth
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
-              Welcome back, <span className="gradient-text">{user?.name || 'Student'}</span>!
+              Welcome back, <span className="gradient-text">{welcomeName}</span>!
             </h1>
             <p className="text-gray-400 text-sm sm:text-base max-w-xl">
               Track your learning, check your counseling matches, and continue your guided education path.
@@ -63,7 +138,7 @@ const UserDashboard = () => {
 
           <div className="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
             <div className="relative flex items-center justify-center w-14 h-14 rounded-full border border-white/15 bg-gray-950">
-              <span className="text-white font-bold text-sm">{stats.profileCompletion}%</span>
+              <span className="text-white font-bold text-sm">{completionPercent}%</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-white">Profile Strength</p>
@@ -71,7 +146,7 @@ const UserDashboard = () => {
               <div className="w-32 h-1.5 bg-white/10 rounded-full mt-2 overflow-hidden">
                 <div 
                   className="h-full bg-gradient-to-r from-primary-500 to-secondary-500 transition-all duration-500" 
-                  style={{ width: `${stats.profileCompletion}%` }}
+                  style={{ width: `${completionPercent}%` }}
                 />
               </div>
             </div>
@@ -82,10 +157,10 @@ const UserDashboard = () => {
       {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {[
-          { label: 'Courses Enrolled', value: stats.coursesEnrolled, icon: GraduationCap, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-          { label: 'Quizzes Completed', value: stats.quizzesCompleted, icon: CheckCircle, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
-          { label: 'Jobs Applied', value: stats.jobsApplied, icon: Briefcase, color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
-          { label: 'Profile Actions', value: '4 Pending', icon: User, color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
+          { label: 'Courses Enrolled', value: coursesCount, icon: GraduationCap, color: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
+          { label: 'Quizzes Completed', value: quizzesCount, icon: CheckCircle, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+          { label: 'Jobs Applied/Saved', value: jobsCount, icon: Briefcase, color: 'text-orange-400 bg-orange-500/10 border-orange-500/20' },
+          { label: 'Profile Actions', value: `${pendingActionsCount} Pending`, icon: User, color: 'text-rose-400 bg-rose-500/10 border-rose-500/20' },
         ].map((stat, index) => {
           const Icon = stat.icon
           return (
@@ -145,11 +220,7 @@ const UserDashboard = () => {
             </div>
           }>
             <div className="space-y-3.5">
-              {[
-                { text: 'Completed Python Fundamentals Quiz', time: '2 hours ago', status: 'Success', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-                { text: 'Enrolled in Data Science & Machine Learning Course', time: '1 day ago', status: 'In Progress', color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-                { text: 'Applied for Front-End Engineer position at TechCorp', time: '2 days ago', status: 'Applied', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-              ].map((activity, index) => (
+              {displayActivities.map((activity, index) => (
                 <div 
                   key={index} 
                   className="flex items-center justify-between gap-4 p-4 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors"

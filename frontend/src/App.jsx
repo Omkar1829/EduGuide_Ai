@@ -18,6 +18,7 @@ import QuizResultPage from './pages/QuizResultPage'
 import SettingsPage from './pages/SettingsPage'
 import ResumeBuilderPage from './pages/ResumeBuilderPage'
 import KnowledgeCenterPage from './pages/KnowledgeCenterPage'
+import ProfilePage from './pages/ProfilePage'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminUsersPage from './pages/admin/AdminUsersPage'
 import AdminCoursesPage from './pages/admin/AdminCoursesPage'
@@ -76,7 +77,8 @@ const App = () => {
           <Route path="/quiz" element={<QuizPage />} />
           <Route path="/quiz/:id" element={<QuizTakePage />} />
           <Route path="/quiz/:id/results" element={<QuizResultPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
+           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/resume-builder" element={<ResumeBuilderPage />} />
           <Route path="/knowledge-center" element={<KnowledgeCenterPage />} />
         </Route>

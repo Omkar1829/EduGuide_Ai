@@ -110,9 +110,10 @@ const jobSlice = createSlice({
       })
       .addCase(fetchJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.jobs = action.payload?.jobs || action.payload || [];
-        if (action.payload?.pagination) {
-          state.pagination = action.payload.pagination;
+        state.jobs = action.payload?.jobs || action.payload?.data?.jobs || (Array.isArray(action.payload) ? action.payload : []);
+        const pag = action.payload?.pagination || action.payload?.data?.pagination;
+        if (pag) {
+          state.pagination = pag;
         }
       })
       .addCase(fetchJobs.rejected, (state, action) => {
@@ -126,7 +127,7 @@ const jobSlice = createSlice({
       })
       .addCase(fetchJobById.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentJob = action.payload;
+        state.currentJob = action.payload?.data || action.payload;
       })
       .addCase(fetchJobById.rejected, (state, action) => {
         state.loading = false;
@@ -139,9 +140,10 @@ const jobSlice = createSlice({
       })
       .addCase(fetchSavedJobs.fulfilled, (state, action) => {
         state.loading = false;
-        state.savedJobs = action.payload?.jobs || action.payload || [];
-        if (action.payload?.pagination) {
-          state.pagination = action.payload.pagination;
+        state.savedJobs = action.payload?.userJobs || action.payload?.jobs || action.payload?.data?.userJobs || action.payload?.data?.jobs || (Array.isArray(action.payload) ? action.payload : []);
+        const pag = action.payload?.pagination || action.payload?.data?.pagination;
+        if (pag) {
+          state.pagination = pag;
         }
       })
       .addCase(fetchSavedJobs.rejected, (state, action) => {
@@ -155,7 +157,10 @@ const jobSlice = createSlice({
       })
       .addCase(saveJob.fulfilled, (state, action) => {
         state.loading = false;
-        state.savedJobs.push(action.payload);
+        const saved = action.payload?.data || action.payload;
+        if (saved && !state.savedJobs.some(j => j.id === saved.id || j.jobId === saved.jobId)) {
+          state.savedJobs.push(saved);
+        }
       })
       .addCase(saveJob.rejected, (state, action) => {
         state.loading = false;

@@ -11,6 +11,7 @@ const getAllJobs = async (req, res, next) => {
       company: req.query.company,
       location: req.query.location,
       experience: req.query.experience,
+      search: req.query.search || req.query.q,
     };
 
     const result = await jobService.getAllJobs(filters, pagination);

@@ -8,6 +8,7 @@ import api from '../services/api';
 import { toast } from 'react-toastify';
 import PricingModal from '../components/common/PricingModal';
 import Spinner from '../components/common/Spinner';
+import Modal from '../components/common/Modal';
 
 const KnowledgeCenterPage = () => {
   const { user } = useSelector((state) => state.auth || {});
@@ -15,6 +16,7 @@ const KnowledgeCenterPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState(null);
 
   const isProOrAbove = user?.subscriptionTier === 'PRO' || user?.subscriptionTier === 'PRO_PLUS';
 
@@ -129,7 +131,8 @@ const KnowledgeCenterPage = () => {
           {articles.map((art, idx) => (
             <div 
               key={art.id || idx}
-              className="flex flex-col h-full rounded-2xl glass border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/5 bg-slate-900/40 relative group"
+              onClick={() => setSelectedArticle(art)}
+              className="flex flex-col h-full rounded-2xl glass border border-white/10 overflow-hidden hover:border-white/20 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-indigo-500/5 bg-slate-900/40 relative group cursor-pointer"
             >
               {/* Image banner mock */}
               <div className="h-44 bg-gradient-to-tr from-slate-900 via-slate-800 to-indigo-950 flex items-center justify-center relative p-6">
@@ -186,6 +189,63 @@ const KnowledgeCenterPage = () => {
           </p>
         </div>
       )}
+      {/* Article Detail Modal Overlay */}
+      <Modal
+        isOpen={!!selectedArticle}
+        onClose={() => setSelectedArticle(null)}
+        title={selectedArticle?.title}
+        size="lg"
+      >
+        {selectedArticle && (
+          <div className="space-y-6 text-gray-200">
+            {/* Category / Industry Header Banner */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+                {selectedArticle.category || 'General'}
+              </span>
+              <span className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 uppercase tracking-widest">
+                <Tag className="w-3.5 h-3.5" />
+                {selectedArticle.industry || 'Tech'}
+              </span>
+            </div>
+
+            {/* Content summary italicized */}
+            <div className="bg-white/5 border border-white/5 p-4 rounded-2xl">
+              <h4 className="text-xs font-bold uppercase text-indigo-400 mb-1.5 tracking-wider">Executive Summary</h4>
+              <p className="text-sm text-gray-300 leading-relaxed italic">{selectedArticle.summary}</p>
+            </div>
+
+            {/* Full text details */}
+            <div className="space-y-3.5">
+              <h4 className="text-xs font-bold uppercase text-gray-400 tracking-wider">Full Analysis & Insights</h4>
+              <p className="text-sm leading-relaxed text-gray-300 whitespace-pre-line bg-white/[0.02] p-4 rounded-xl border border-white/5">{selectedArticle.content}</p>
+            </div>
+
+            {/* Read time and metadata actions */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10 text-xs text-gray-500">
+              <div className="flex items-center gap-1.5 bg-black/20 px-3 py-1.5 rounded-lg border border-white/5">
+                <Clock className="w-4 h-4 text-indigo-400" />
+                <span className="font-semibold text-gray-300">3 min read</span>
+              </div>
+              
+              {selectedArticle.url ? (
+                <a
+                  href={selectedArticle.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-600/10"
+                >
+                  <Globe className="w-4 h-4 text-white" />
+                  View Original Source
+                  <ArrowRight className="w-4 h-4 text-white" />
+                </a>
+              ) : (
+                <div className="text-gray-500 italic text-[11px]">Personalized brief generated via Gemini AI</div>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

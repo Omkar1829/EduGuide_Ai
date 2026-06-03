@@ -32,6 +32,8 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
     currency: 'USD',
   })
 
+  const selectClass = "w-full py-3.5 px-4 rounded-xl bg-gray-900 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/50 hover:border-white/20 transition-all duration-200 text-sm cursor-pointer"
+
   useEffect(() => {
     if (course) {
       setFormData({
@@ -84,6 +86,7 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
           required
           icon={<GraduationCap className="w-4 h-4" />}
         />
+        
         <div className="space-y-1.5">
           <label className="block text-sm font-medium text-gray-300">Description</label>
           <textarea
@@ -92,9 +95,10 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
             onChange={handleChange}
             rows={3}
             placeholder="Brief description of the course..."
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 min-h-[80px] resize-none transition-all duration-200"
+            className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/50 min-h-[80px] resize-none transition-all duration-200 text-sm"
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Provider"
@@ -113,6 +117,7 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
             icon={<LinkIcon className="w-4 h-4" />}
           />
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="Duration"
@@ -122,34 +127,37 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
             placeholder="e.g. 8 weeks"
             icon={<Clock className="w-4 h-4" />}
           />
+          
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-300">Level</label>
             <select
               name="level"
               value={formData.level}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-200"
+              className={selectClass}
             >
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-              <option value="all-levels">All Levels</option>
+              <option className="bg-gray-950 text-white" value="beginner">Beginner</option>
+              <option className="bg-gray-950 text-white" value="intermediate">Intermediate</option>
+              <option className="bg-gray-950 text-white" value="advanced">Advanced</option>
+              <option className="bg-gray-950 text-white" value="all-levels">All Levels</option>
             </select>
           </div>
+
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-300">Category</label>
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-200"
+              className={selectClass}
             >
               {COURSE_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
+                <option className="bg-gray-950 text-white" key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Price"
@@ -162,22 +170,24 @@ const CourseFormModal = ({ isOpen, onClose, onSave, course, loading = false }) =
             placeholder="0.00"
             icon={<DollarSign className="w-4 h-4" />}
           />
+          
           <div className="space-y-1.5">
             <label className="block text-sm font-medium text-gray-300">Currency</label>
             <select
               name="currency"
               value={formData.currency}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.1] text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all duration-200"
+              className={selectClass}
             >
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="INR">INR</option>
+              <option className="bg-gray-950 text-white" value="USD">USD</option>
+              <option className="bg-gray-950 text-white" value="EUR">EUR</option>
+              <option className="bg-gray-950 text-white" value="GBP">GBP</option>
+              <option className="bg-gray-950 text-white" value="INR">INR</option>
             </select>
           </div>
         </div>
-        <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10 mt-2">
           <Button variant="secondary" onClick={onClose} type="button" disabled={loading}>
             Cancel
           </Button>

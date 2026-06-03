@@ -14,15 +14,15 @@ model Job {
   company      String
   location     String?
   url          String?   @unique
-  salaryRange  String?   @map("salary_range")
+  salaryRange  String?
   experience   String?
   skills       String[]
   category     String
-  type         String    @default("full-time") @map("type")
-  isActive     Boolean   @default(true) @map("is_active")
-  postedAt     DateTime? @default(now()) @map("posted_at")
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  type         String    @default("full-time")
+  isActive     Boolean   @default(true)
+  postedAt     DateTime? @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   @@index([category])
   @@index([location])

@@ -142,7 +142,7 @@ const AdminUsersPage = () => {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] overflow-hidden">
+      <div className="rounded-2xl bg-white/[0.04] border border-white/[0.08] overflow-hidden">
         <UserManagementTable
           users={users}
           loading={loading}

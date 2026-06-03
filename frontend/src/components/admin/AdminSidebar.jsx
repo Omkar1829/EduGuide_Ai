@@ -18,7 +18,6 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     { path: '/admin/courses', label: 'Courses', iconKey: 'courses' },
     { path: '/admin/jobs', label: 'Jobs', iconKey: 'jobs' },
     { path: '/admin/quizzes', label: 'Quizzes', iconKey: 'quizzes' },
-    { path: '/admin/analytics', label: 'Analytics', iconKey: 'analytics' },
   ]
 
   return (
@@ -67,16 +66,6 @@ const AdminSidebar = ({ isOpen, onClose }) => {
           </nav>
 
           <div className="px-4 mt-auto space-y-3">
-            <div className="border-t border-white/10 pt-4">
-              <Link
-                to={ROUTES.DASHBOARD}
-                onClick={onClose}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 hover:bg-white/5 hover:text-white transition-all duration-200 group"
-              >
-                <ArrowLeft className="w-[18px] h-[18px] group-hover:-translate-x-0.5 transition-transform duration-200" />
-                <span>Back to User Dashboard</span>
-              </Link>
-            </div>
             <div className="p-4 rounded-xl bg-white/[0.04] backdrop-blur-sm border border-white/[0.08]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-500/20">

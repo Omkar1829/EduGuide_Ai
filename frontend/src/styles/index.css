@@ -458,19 +458,27 @@ html:not(.dark) .bg-gray-900 * {
 }
 
 /* Preserve original white color for text/SVGs inside vivid gradients or buttons */
-html:not(.dark) .bg-gradient-to-r:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
-html:not(.dark) .bg-gradient-to-br:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
-html:not(.dark) .bg-gradient-to-tr:not(.bg-white\/5):not(.bg-white\/10):not(.from-white\/\[0\.08\]):not(.from-white\/\[0\.03\]):not(.from-indigo-950\/60):not(.from-primary-950\/40):not(.bg-white\/\[0\.04\]):not(.bg-white\/\[0\.05\]):not(.bg-white\/\[0\.06\]):not(.bg-white\/\[0\.07\]) *,
 html:not(.dark) .gradient-btn *,
 html:not(.dark) .gradient-btn,
 html:not(.dark) .btn-primary *,
 html:not(.dark) .btn-primary,
 html:not(.dark) .bg-indigo-500 *,
+html:not(.dark) .bg-indigo-600 *,
+html:not(.dark) .bg-purple-500 *,
 html:not(.dark) .bg-purple-600 *,
 html:not(.dark) .bg-primary-500 *,
+html:not(.dark) .bg-secondary-500 *,
 html:not(.dark) .bg-blue-500 *,
 html:not(.dark) .bg-emerald-500 *,
-html:not(.dark) .bg-orange-500 * {
+html:not(.dark) .bg-orange-500 *,
+html:not(.dark) .bg-rose-500 *,
+html:not(.dark) .bg-rose-600 *,
+html:not(.dark) .from-primary-500 *,
+html:not(.dark) .from-secondary-500 *,
+html:not(.dark) .from-blue-500 *,
+html:not(.dark) .from-purple-500 *,
+html:not(.dark) .from-emerald-500 *,
+html:not(.dark) .from-orange-500 * {
   color: #ffffff !important;
   stroke: #ffffff !important;
 }
@@ -492,3 +500,8 @@ html:not(.dark) .bg-gradient-to-br.from-indigo-950\/60 {
   border-color: rgba(99, 102, 241, 0.12) !important;
 }
 
+/* Legibility override for standard HTML select option tags in Dark Mode */
+select option {
+  background-color: #030712 !important;
+  color: #ffffff !important;
+}

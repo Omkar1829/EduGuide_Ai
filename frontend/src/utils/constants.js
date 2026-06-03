@@ -60,9 +60,9 @@ export const API_ENDPOINTS = {
 }
 
 export const ROLES = {
-  STUDENT: 'student',
-  COUNSELOR: 'counselor',
-  ADMIN: 'admin',
+  STUDENT: 'STUDENT',
+  COUNSELOR: 'COUNSELOR',
+  ADMIN: 'ADMIN',
 }
 
 export const QUIZ_CATEGORIES = [
@@ -104,10 +104,13 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTER: '/register',
   PROFILE_WIZARD: '/profile-wizard',
+  PROFILE: '/profile',
   DASHBOARD: '/dashboard',
   AI_DASHBOARD: '/ai-dashboard',
   COURSES: '/courses',
+  COURSE_DETAIL: '/courses/:id',
   JOBS: '/jobs',
+  JOB_DETAIL: '/jobs/:id',
   QUIZ: '/quiz',
   SETTINGS: '/settings',
   ADMIN: '/admin',

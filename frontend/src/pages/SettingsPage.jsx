@@ -1,5 +1,7 @@
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useState, useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import Card from '../components/common/Card'
 import Button from '../components/common/Button'
 import {
@@ -14,13 +16,19 @@ import {
   Moon,
   Save,
   ChevronRight,
+  Sparkles,
 } from 'lucide-react'
+import { fetchProfile, updateProfile } from '../store/slices/profileSlice'
+import { setUser } from '../store/slices/authSlice'
 
 const SettingsPage = () => {
+  const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
+  const { profile } = useSelector((state) => state.profile)
   const [activeTab, setActiveTab] = useState('profile')
   const [formData, setFormData] = useState({
-    name: user?.name || '',
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
     email: user?.email || '',
     phone: '',
     bio: '',
@@ -36,12 +44,50 @@ const SettingsPage = () => {
   const inputClass = 'w-full py-3 px-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white placeholder-gray-500 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/50 hover:border-white/20'
   const selectClass = 'w-full py-3 px-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500/40 focus:border-primary-500/50 hover:border-white/20 appearance-none cursor-pointer'
 
+  useEffect(() => {
+    dispatch(fetchProfile())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (profile || user) {
+      setFormData({
+        firstName: user?.firstName || '',
+        lastName: user?.lastName || '',
+        email: user?.email || '',
+        phone: profile?.phoneNumber || '',
+        bio: profile?.bio || '',
+      })
+    }
+  }, [profile, user])
+
+  const handleSave = async (e) => {
+    e.preventDefault()
+    try {
+      await dispatch(updateProfile({
+        firstName: formData.firstName || undefined,
+        lastName: formData.lastName || undefined,
+        phoneNumber: formData.phone || undefined,
+        bio: formData.bio || undefined,
+      })).unwrap()
+
+      dispatch(setUser({
+        ...user,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }))
+      
+      toast.success('Profile settings saved successfully!')
+    } catch (err) {
+      toast.error(err || 'Failed to save profile changes')
+    }
+  }
+
   return (
     <div className="space-y-8 animate-in">
       {/* Page Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-white mb-2 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-lg shadow-primary-500/20">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center shadow-lg shadow-primary-500/25">
             <Settings className="w-5 h-5 text-white" />
           </div>
           Settings
@@ -90,21 +136,41 @@ const SettingsPage = () => {
                 <h3 className="text-lg font-semibold text-white">Profile Information</h3>
               </div>
             }>
-              <form className="space-y-5">
-                {/* Name Field */}
-                <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-gray-300">Full Name</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                      <User className="w-4 h-4 text-gray-500" />
+              <form onSubmit={handleSave} className="space-y-5">
+                {/* Name Fields (First and Last Name) */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium text-gray-300">First Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <User className="w-4 h-4 text-gray-500" />
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        className={`${inputClass} pl-11`}
+                        placeholder="First name"
+                        required
+                      />
                     </div>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className={`${inputClass} pl-11`}
-                      placeholder="Enter your name"
-                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium text-gray-300">Last Name</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                        <User className="w-4 h-4 text-gray-500" />
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.lastName}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        className={`${inputClass} pl-11`}
+                        placeholder="Last name"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -118,8 +184,8 @@ const SettingsPage = () => {
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className={`${inputClass} pl-11`}
+                      disabled
+                      className={`${inputClass} pl-11 opacity-60 cursor-not-allowed`}
                       placeholder="you@example.com"
                     />
                   </div>
@@ -153,8 +219,26 @@ const SettingsPage = () => {
                   />
                 </div>
 
-                <Button icon={<Save className="w-4 h-4" />}>Save Changes</Button>
+                <Button type="submit" icon={<Save className="w-4 h-4" />}>Save Changes</Button>
               </form>
+
+              <div className="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-indigo-500/5 border border-indigo-500/10 p-4 rounded-2xl">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-primary-400 animate-pulse" />
+                    Looking to manage qualifications or certifications?
+                  </h4>
+                  <p className="text-xs text-gray-400 max-w-xl">
+                    Add, edit, or remove your academic history, skills portfolio, and professional certifications to receive tailored AI recommendations.
+                  </p>
+                </div>
+                <Link
+                  to="/profile"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-500/15 border border-primary-500/30 text-primary-300 hover:bg-primary-500/25 transition text-xs font-bold shrink-0 shadow-sm"
+                >
+                  Manage Portfolio <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
             </Card>
           )}
 

@@ -37,6 +37,19 @@ export const fetchCareerRecommendations = createAsyncThunk(
   }
 );
 
+export const generateRecommendationsThunk = createAsyncThunk(
+  "aiDashboard/generateRecommendationsThunk",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await aiDashboardService.generateRecommendations();
+      return response.data;
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message || "Failed to generate recommendations";
+      return rejectWithValue(errMsg);
+    }
+  }
+);
+
 export const fetchSkillGap = createAsyncThunk(
   "aiDashboard/fetchSkillGap",
   async (_, { rejectWithValue }) => {
@@ -181,6 +194,20 @@ const aiDashboardSlice = createSlice({
           action.payload?.recommendations || action.payload || [];
       })
       .addCase(fetchCareerRecommendations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      
+      .addCase(generateRecommendationsThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(generateRecommendationsThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        const list = action.payload?.data || action.payload?.recommendations || action.payload || [];
+        state.careerRecommendations = list;
+      })
+      .addCase(generateRecommendationsThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })

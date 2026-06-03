@@ -76,6 +76,15 @@ const chat = async (req, res) => {
       sessionId,
       context,
     });
+
+    const prisma = require("../config/prisma");
+    const updatedUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { chatLimitRemaining: true },
+    });
+
+    result.chatLimitRemaining = updatedUser ? updatedUser.chatLimitRemaining : 0;
+
     return success(res, result, "Chat response generated successfully", 200);
   } catch (err) {
     const statusCode = err.statusCode || 500;

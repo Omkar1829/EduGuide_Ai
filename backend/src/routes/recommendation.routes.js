@@ -58,6 +58,12 @@ router.get(
   recommendationController.getRecommendations
 );
 
+router.post(
+  "/generate",
+  authenticate,
+  recommendationController.generateRecommendations
+);
+
 router.get(
   "/:id",
   authenticate,

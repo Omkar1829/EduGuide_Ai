@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import aiService from "../../services/aiService";
+import { setUser } from "./authSlice";
 
 export const fetchCareerRecommendation = createAsyncThunk(
   "ai/fetchCareerRecommendation",
@@ -51,10 +52,22 @@ export const fetchRoadmap = createAsyncThunk(
 
 export const sendChatMessage = createAsyncThunk(
   "ai/sendChatMessage",
-  async ({ message, sessionId, history }, { rejectWithValue }) => {
+  async ({ message, sessionId, history }, { getState, dispatch, rejectWithValue }) => {
     try {
       const response = await aiService.sendMessage(message, sessionId, history);
-      return response.data;
+      
+      // If the response contains chatLimitRemaining, update the auth user state!
+      if (response?.data?.chatLimitRemaining !== undefined) {
+        const { user } = getState().auth;
+        if (user) {
+          dispatch(setUser({
+            ...user,
+            chatLimitRemaining: response.data.chatLimitRemaining
+          }));
+        }
+      }
+      
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -220,15 +233,16 @@ const aiSlice = createSlice({
       })
       .addCase(sendChatMessage.fulfilled, (state, action) => {
         const payload = action.payload;
-        if (payload?.sessionId) {
-          state.chatSessionId = payload.sessionId;
+        const chatData = payload?.data || payload;
+        if (chatData?.sessionId) {
+          state.chatSessionId = chatData.sessionId;
         }
-        if (payload?.reply) {
+        if (chatData?.message) {
           state.chatMessages.push({
-            id: Date.now(),
+            id: chatData.id || Date.now(),
             role: "assistant",
-            content: payload.reply,
-            timestamp: new Date().toISOString(),
+            content: chatData.message,
+            timestamp: chatData.timestamp || new Date().toISOString(),
           });
         }
       })

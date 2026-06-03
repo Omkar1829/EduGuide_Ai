@@ -26,6 +26,10 @@ const ProtectedRoute = ({ adminOnly = false }) => {
     return <Navigate to={ROUTES.DASHBOARD} replace />
   }
 
+  if (!adminOnly && user?.role === ROLES.ADMIN) {
+    return <Navigate to={ROUTES.ADMIN} replace />
+  }
+
   return <Outlet />
 }
 

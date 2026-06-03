@@ -90,10 +90,10 @@ const AdminAnalyticsPage = () => {
   }
 
   const summaryStats = [
-    { label: 'Total Signups', value: analytics?.totalSignups || 1250, icon: <UserPlus className="w-5 h-5" />, color: 'text-indigo-400' },
-    { label: 'Course Enrollments', value: analytics?.totalEnrollments || 3420, icon: <GraduationCap className="w-5 h-5" />, color: 'text-emerald-400' },
-    { label: 'Job Applications', value: analytics?.totalApplications || 1890, icon: <Briefcase className="w-5 h-5" />, color: 'text-amber-400' },
-    { label: 'Quiz Completions', value: analytics?.totalQuizzes || 856, icon: <CheckCircle className="w-5 h-5" />, color: 'text-rose-400' },
+    { label: 'Total Signups', value: analytics?.totalSignups ?? 1250, icon: <UserPlus className="w-5 h-5" />, color: 'text-indigo-400' },
+    { label: 'Course Enrollments', value: analytics?.totalEnrollments ?? 3420, icon: <GraduationCap className="w-5 h-5" />, color: 'text-emerald-400' },
+    { label: 'Job Applications', value: analytics?.totalApplications ?? 1890, icon: <Briefcase className="w-5 h-5" />, color: 'text-amber-400' },
+    { label: 'Quiz Completions', value: analytics?.totalQuizzes ?? 856, icon: <CheckCircle className="w-5 h-5" />, color: 'text-rose-400' },
   ]
 
   const healthItems = [

@@ -8,6 +8,7 @@ const ChatWidget = () => {
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
   const dispatch = useDispatch()
+  const { user } = useSelector((state) => state.auth)
   const { chatMessages, loading: chatLoading, chatSessionId } = useSelector((state) => state.ai)
 
   useEffect(() => {
@@ -44,8 +45,15 @@ const ChatWidget = () => {
                 🤖
               </div>
               <div>
-                <h4 className="text-sm font-semibold text-white">AI Counselor</h4>
-                <p className="text-[10px] text-emerald-400 flex items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-semibold text-white">AI Counselor</h4>
+                  {user?.role === 'STUDENT' && (
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                      {user?.chatLimitRemaining} Left
+                    </span>
+                  )}
+                </div>
+                <p className="text-[10px] text-emerald-400 flex items-center gap-1 mt-0.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
                   Online
                 </p>

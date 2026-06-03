@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 const Modal = ({
@@ -40,7 +41,8 @@ const Modal = ({
       document.removeEventListener('keydown', handleEscape)
       document.body.style.overflow = 'unset'
     }
-  }, [isOpen, onClose])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen])
 
   const handleBackdropClick = (e) => {
     if (closeOnBackdrop && e.target === e.currentTarget) {
@@ -58,7 +60,7 @@ const Modal = ({
 
   if (!isOpen) return null
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4
                  bg-black/60 backdrop-blur-sm animate-fade-in"
@@ -70,6 +72,7 @@ const Modal = ({
       <div
         ref={modalRef}
         tabIndex={-1}
+        style={{ maxHeight: '90vh' }}
         className={`
           w-full ${sizes[size]}
           bg-gradient-to-br from-white/[0.08] to-white/[0.03]
@@ -79,11 +82,13 @@ const Modal = ({
           border border-white/[0.12]
           animate-slide-up
           focus:outline-none
+          flex flex-col
+          overflow-hidden
           ${className}
         `}
       >
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 pb-0">
+          <div className="flex items-center justify-between p-6 pb-4 border-b border-white/5 shrink-0">
             {title && (
               <h2
                 id="modal-title"
@@ -113,9 +118,10 @@ const Modal = ({
             )}
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="p-6 overflow-y-auto scrollbar-thin flex-1 min-h-0">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 

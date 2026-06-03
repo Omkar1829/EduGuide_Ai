@@ -252,6 +252,37 @@ const deleteQuiz = async (req, res, next) => {
   }
 };
 
+const scrapeJobs = async (req, res, next) => {
+  try {
+    const { location, limit, keyword } = req.body;
+    if (!location) {
+      return res.status(400).json({ success: false, message: "Location is required" });
+    }
+    const result = await adminService.scrapeJobs(location, limit, keyword);
+    return success(res, result, "Scraper run initialized successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getScrapeStatus = async (req, res, next) => {
+  try {
+    const result = adminService.getScrapeStatus();
+    return success(res, result, "Scraper status retrieved successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
+const stopScrapeJobs = async (req, res, next) => {
+  try {
+    const result = adminService.stopScrapeJobs();
+    return success(res, result, "Scraper process terminated successfully");
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -277,4 +308,7 @@ module.exports = {
   getAllQuizzes,
   getQuizById,
   deleteQuiz,
+  scrapeJobs,
+  getScrapeStatus,
+  stopScrapeJobs,
 };

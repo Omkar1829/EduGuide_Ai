@@ -11,6 +11,9 @@ const aiDashboardService = {
   getCareerRecommendations: () =>
     api.get("/recommendations", { params: { type: "CAREER" } }),
 
+  generateRecommendations: () =>
+    api.post("/recommendations/generate"),
+
   getSkillGap: () => api.get("/profile/profile/completion"),
 
   getRoadmaps: (params = {}) => api.get("/roadmaps", { params }),
